@@ -9,7 +9,6 @@ return {
 
     require('formatter').setup {
 
-
       -- Enable or disable logging
       logging = true,
       -- Set the log level
