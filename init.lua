@@ -284,11 +284,10 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   {
     'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
-    config = function ()
+    config = function()
       require('guess-indent').setup {}
     end,
   },
-
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -817,6 +816,10 @@ require('lazy').setup({
         typescript = { 'prettierd', 'prettier', stop_after_first = true },
         typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
         javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+        go = { 'gofumpt', 'gofmt', 'goimports' },
+      },
+      default_format_opts = {
+        lsp_format = 'fallback',
       },
     },
   },
@@ -1041,7 +1044,7 @@ require('lazy').setup({
   require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   require 'custom.plugins.harpoon',
-  require 'custom.plugins.copilot',
+  -- require 'custom.plugins.copilot',
   -- require 'custom.plugins.null-ls',
   -- require 'custom.plugins.prettier',
   -- require 'custom.plugins.formatter',
