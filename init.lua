@@ -962,6 +962,7 @@ require('lazy').setup({
   -- require 'custom.plugins.harpoon',
   require 'custom.plugins.claude',
   require 'custom.plugins.copilot',
+  require 'custom.plugins.snacks',
   -- require 'custom.plugins.null-ls',
   -- require 'custom.plugins.prettier',
   -- require 'custom.plugins.formatter',
