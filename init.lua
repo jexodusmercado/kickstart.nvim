@@ -285,9 +285,7 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   {
     'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
-    config = function()
-      require('guess-indent').setup {}
-    end,
+    config = function() require('guess-indent').setup {} end,
   },
 
   -- NOTE: Plugins can also be added by using a table,
@@ -648,7 +646,7 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        ts_ls = {},
 
         stylua = {}, -- Used to format Lua code
 
@@ -960,13 +958,13 @@ require('lazy').setup({
   -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommended keymaps
-  require 'custom.plugins.harpoon',
-  -- require 'custom.plugins.copilot',
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommended keymaps
+  -- require 'custom.plugins.harpoon',
+  require 'custom.plugins.claude',
+  require 'custom.plugins.copilot',
   -- require 'custom.plugins.null-ls',
   -- require 'custom.plugins.prettier',
   -- require 'custom.plugins.formatter',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
