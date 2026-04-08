@@ -960,9 +960,10 @@ require('lazy').setup({
   require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommended keymaps
-  -- require 'custom.plugins.harpoon',
+  require 'custom.plugins.harpoon',
   require 'custom.plugins.claude',
   require 'custom.plugins.copilot',
+  -- require 'custom.plugins.copilot-chat',
   require 'custom.plugins.snacks',
   -- require 'custom.plugins.null-ls',
   -- require 'custom.plugins.prettier',
