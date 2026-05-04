@@ -134,6 +134,7 @@ vim.o.updatetime = 250
 
 -- Decrease mapped sequence wait time
 vim.o.timeoutlen = 300
+vim.o.ttimeoutlen = 10
 
 -- Configure how new splits should be opened
 vim.o.splitright = true
@@ -197,6 +198,12 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 --
 -- vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+
+-- Fix pasting in terminal mode
+vim.keymap.set('t', '<C-S-v>', function()
+  local keys = vim.api.nvim_replace_termcodes('<C-\\><C-n>"+pi', true, false, true)
+  vim.api.nvim_feedkeys(keys, 'n', false)
+end, { desc = 'Paste from clipboard in terminal mode' })
 
 -- TIP: Disable arrow keys in normal mode
 vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
