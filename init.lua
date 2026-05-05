@@ -261,9 +261,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 })
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
+vim.keymap.set('n', '[d', function() vim.diagnostic.jump { count = -1 } end, { desc = 'Previous diagnostic' })
+vim.keymap.set('n', ']d', function() vim.diagnostic.jump { count = 1 } end, { desc = 'Next diagnostic' })
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror' })
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -363,6 +363,8 @@ require('lazy').setup({
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
+        { '<leader>g', group = '[G]it' },
+        { '<leader>a', group = '[A]I/Claude' },
         { 'gr', group = 'LSP Actions', mode = { 'n' } },
       },
     },
@@ -644,18 +646,37 @@ require('lazy').setup({
       --  See `:help lsp-config` for information about keys and how to configure
       ---@type table<string, vim.lsp.Config>
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`ts_ls`) will work just fine
-        ts_ls = {},
-
-        stylua = {}, -- Used to format Lua code
+        ts_ls = {
+          settings = {
+            typescript = {
+              inlayHints = {
+                includeInlayParameterNameHints = 'literals',
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayVariableTypeHints = false,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayEnumMemberValueHints = true,
+              },
+            },
+            javascript = {
+              inlayHints = {
+                includeInlayParameterNameHints = 'all',
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayVariableTypeHints = true,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayEnumMemberValueHints = true,
+              },
+            },
+          },
+        },
+        eslint = {
+          settings = { workingDirectories = { mode = 'auto' } },
+        },
+        html = {},
+        cssls = {},
+        jsonls = {},
+        tailwindcss = {},
 
         -- Special Lua Config, as recommended by neovim help docs
         lua_ls = {
@@ -696,7 +717,8 @@ require('lazy').setup({
       -- You can press `g?` for help in this menu.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        -- You can add other tools here that you want Mason to install
+        'stylua', -- Lua formatter
+        'prettierd', -- JS/TS/CSS/HTML/JSON/YAML/Markdown formatter
       })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -738,18 +760,24 @@ require('lazy').setup({
           }
         end
       end,
-      formatters_by_ft = {
-        lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
-        javascript = { 'prettierd', 'prettier', stop_after_first = true },
-        typescript = { 'prettierd', 'prettier', stop_after_first = true },
-        typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
-        javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
-        go = { 'gofumpt', 'gofmt', 'goimports' },
-      },
+      formatters_by_ft = (function()
+        local prettier = { 'prettierd', 'prettier', stop_after_first = true }
+        return {
+          lua = { 'stylua' },
+          javascript = prettier,
+          javascriptreact = prettier,
+          typescript = prettier,
+          typescriptreact = prettier,
+          json = prettier,
+          jsonc = prettier,
+          css = prettier,
+          scss = prettier,
+          html = prettier,
+          yaml = prettier,
+          markdown = prettier,
+          graphql = prettier,
+        }
+      end)(),
       default_format_opts = {
         lsp_format = 'fallback',
       },
@@ -837,12 +865,10 @@ require('lazy').setup({
 
       -- Blink.cmp includes an optional, recommended rust fuzzy matcher,
       -- which automatically downloads a prebuilt binary when enabled.
-      --
-      -- By default, we use the Lua implementation instead, but you may enable
-      -- the rust implementation via `'prefer_rust_with_warning'`
-      --
-      -- See :h blink-cmp-config-fuzzy for more information
-      fuzzy = { implementation = 'lua' },
+      fuzzy = {
+        implementation = 'prefer_rust_with_warning',
+        prebuilt_binaries = { download = true },
+      },
 
       -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },
@@ -925,7 +951,13 @@ require('lazy').setup({
     branch = 'main',
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+      local parsers = {
+        'bash', 'c', 'diff', 'lua', 'luadoc', 'query', 'vim', 'vimdoc',
+        'markdown', 'markdown_inline',
+        'javascript', 'typescript', 'tsx', 'jsdoc',
+        'html', 'css', 'scss', 'json', 'yaml', 'toml',
+        'regex', 'gitcommit', 'gitignore',
+      }
       require('nvim-treesitter').install(parsers)
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
@@ -965,16 +997,12 @@ require('lazy').setup({
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommended keymaps
   require 'custom.plugins.harpoon',
   require 'custom.plugins.claude',
   require 'custom.plugins.copilot',
-  -- require 'custom.plugins.copilot-chat',
+  require 'custom.plugins.fugitive',
   require 'custom.plugins.snacks',
-  -- require 'custom.plugins.null-ls',
-  -- require 'custom.plugins.prettier',
-  -- require 'custom.plugins.formatter',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.

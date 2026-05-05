@@ -1,16 +1,8 @@
--- You can add your own plugins here or in other files in this directory!
---  I promise not to create any merge conflicts in this directory :)
---
--- See the kickstart.nvim README for more information
 return {
   'theprimeagen/harpoon',
-  config = function()
-    require('harpoon').setup {}
-
-    local mark = require 'harpoon.mark'
-    local ui = require 'harpoon.ui'
-
-    vim.keymap.set('n', '<leader>ha', mark.add_file, { desc = 'Harpoon: Add file' })
-    vim.keymap.set('n', '<C-e>', ui.toggle_quick_menu)
-  end,
+  keys = {
+    { '<leader>ha', function() require('harpoon.mark').add_file() end, desc = 'Harpoon: Add file' },
+    { '<C-e>', function() require('harpoon.ui').toggle_quick_menu() end, desc = 'Harpoon: Toggle menu' },
+  },
+  config = function() require('harpoon').setup {} end,
 }
