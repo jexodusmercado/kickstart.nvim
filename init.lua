@@ -678,6 +678,62 @@ require('lazy').setup({
         jsonls = {},
         tailwindcss = {},
 
+        -- Python: pyright for types/completion, ruff for lint + format
+        pyright = {
+          settings = {
+            pyright = {
+              -- Let ruff handle import organization
+              disableOrganizeImports = true,
+            },
+            python = {
+              analysis = {
+                typeCheckingMode = 'basic',
+                autoSearchPaths = true,
+                useLibraryCodeForTypes = true,
+                diagnosticSeverityOverrides = {
+                  -- ruff already reports these
+                  reportUnusedImport = 'none',
+                  reportUnusedVariable = 'none',
+                },
+              },
+            },
+          },
+        },
+        ruff = {
+          on_attach = function(client)
+            -- Defer hover to pyright
+            client.server_capabilities.hoverProvider = false
+          end,
+        },
+
+        -- Go: gopls for completion/diagnostics/navigation
+        gopls = {
+          settings = {
+            gopls = {
+              gofumpt = true,
+              usePlaceholders = true,
+              completeUnimported = true,
+              staticcheck = true,
+              analyses = {
+                unusedparams = true,
+                unusedwrite = true,
+                nilness = true,
+                shadow = false,
+                useany = true,
+              },
+              hints = {
+                assignVariableTypes = true,
+                compositeLiteralFields = true,
+                compositeLiteralTypes = true,
+                constantValues = true,
+                functionTypeParameters = true,
+                parameterNames = true,
+                rangeVariableTypes = true,
+              },
+            },
+          },
+        },
+
         -- Special Lua Config, as recommended by neovim help docs
         lua_ls = {
           on_init = function(client)
@@ -724,6 +780,8 @@ require('lazy').setup({
       vim.list_extend(ensure_installed, {
         'stylua', -- Lua formatter
         'prettierd', -- JS/TS/CSS/HTML/JSON/YAML/Markdown formatter
+        'gofumpt', -- Go formatter (stricter gofmt)
+        'goimports', -- Go import organizer
       })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -755,7 +813,8 @@ require('lazy').setup({
         -- You can specify filetypes to autoformat on save here:
         local enabled_filetypes = {
           -- lua = true,
-          -- python = true,
+          python = true,
+          go = true,
         }
         if enabled_filetypes[vim.bo[bufnr].filetype] then
           return { timeout_ms = 500 }
@@ -767,6 +826,8 @@ require('lazy').setup({
         local prettier = { 'prettierd', 'prettier', stop_after_first = true }
         return {
           lua = { 'stylua' },
+          python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
+          go = { 'goimports', 'gofumpt' },
           javascript = prettier,
           javascriptreact = prettier,
           typescript = prettier,
@@ -969,6 +1030,7 @@ require('lazy').setup({
         'markdown', 'markdown_inline',
         'javascript', 'typescript', 'tsx', 'jsdoc',
         'html', 'css', 'scss', 'json', 'yaml', 'toml',
+        'go', 'gomod', 'gosum', 'gowork',
         'regex', 'gitcommit', 'gitignore',
       }
       require('nvim-treesitter').install(parsers)
